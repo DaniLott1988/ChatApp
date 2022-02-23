@@ -1,7 +1,8 @@
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet } from 'react-native-web';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View } from 'react-native-web';
 import React from 'react';
 import Start from './components/Start';
 import Chat from './components/Chat';
@@ -33,7 +34,7 @@ export default class App extends React.Component {
 }
 
 //StyleSheets should be placed at the bottom of the files.
-/*
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -42,4 +43,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
- */
