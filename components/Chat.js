@@ -38,6 +38,9 @@ export default class Chat extends React.Component {
 
   componentDidMount() {
 
+    let name = this.props.route.params.name;
+    this.props.navigation.setOptions({ title: name });
+
     this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (!user) {
         await firebase.auth().signInAnonymously();
@@ -125,9 +128,6 @@ export default class Chat extends React.Component {
 
   render() {
 
-    let name = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: name });
-
     const { bgColor } = this.props.route.params;
 
     return (
@@ -144,7 +144,7 @@ export default class Chat extends React.Component {
           onSend={messages => this.onSend(messages)}
           user={{
             _id: this.state.user._id,
-            name: this.state.name,
+            name: this.state.user.name,
             avatar: this.state.user.avatar
           }} />
 
