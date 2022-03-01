@@ -5,6 +5,8 @@ import * as firebase from 'firebase';
 import "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
+import MapView from 'react-native-maps';
+import { CustomActions } from './CustomActions';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCz0tSItpib2o8ikutynA33nHmVA-o0Y-A",
@@ -28,6 +30,8 @@ export default class Chat extends React.Component {
         avatar: '',
       },
       isConnected: false,
+      image: null,
+      location: null,
     };
 
     if (!firebase.apps.length){
@@ -130,7 +134,9 @@ export default class Chat extends React.Component {
           _id: data.user._id,
           name: data.user.name,
           avatar: data.user.avatar
-        }
+        },
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     this.setState({
@@ -149,7 +155,9 @@ export default class Chat extends React.Component {
         _id: message.user._id,
         name: message.user.name,
         avatar: message.user.avatar
-      } 
+      },
+      image: message.image || "",
+      location: message.location || null
     });
   }
 
@@ -185,6 +193,31 @@ export default class Chat extends React.Component {
       );
     }
   }
+
+  renderCustomView (props) {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
+
+  renderCustomActions(props) {
+    return <CustomActions {...props} />;
+  }
   
   componentWillUnmount() {
     NetInfo.fetch().then((connection) => {
@@ -212,6 +245,8 @@ export default class Chat extends React.Component {
         <GiftedChat
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderActions={this.renderCustomActions}
+          renderCustomView={this.renderCustomView}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={{

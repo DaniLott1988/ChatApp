@@ -31,8 +31,17 @@ reader so that I can engage with a chat interface.
 * The chat interface and functionality must be created using the Gifted Chat library.
 * The app’s codebase must contain comments.
 
-5. Technologies
+4. Technologies
 * React Native, React
 * Expo
 * Firestore, Firebase
 * Gifted Chat Library
+
+5. How to Install
+* Fork this repository or download it
+* npm/yarn install on the terminal to install all the dependencies
+
+6. How to use the App
+* Install Expo globally ( npm install --global expo-cli )
+* To start the app, run expo start or npm start
+* For the app to run on a smartphone, it needs expo go. Otherwise, on an emulator or simulator is needed.
