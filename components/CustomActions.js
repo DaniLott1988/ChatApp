@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { InputToolbar } from 'react-native-gifted-chat';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import firebase from 'firebase';
@@ -103,7 +102,7 @@ export default class CustomActions extends React.Component {
   };
 
   onActionPress = () => {
-    const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
+    const options = [ "Choose From Library", "Take Picture", "Send Location", "Cancel" ];
     const cancelButtonIndex = options.length - 1;
     this.context.actionSheet().showActionSheetWithOptions(
       {
@@ -113,17 +112,16 @@ export default class CustomActions extends React.Component {
       async (buttonIndex) => {
         switch (buttonIndex) {
           case 0:
-            console.log('user wants to pick an image');
+            console.log("user wants to pick an image");
             return this.pickImage();
           case 1:
-            console.log('user wants to take a photo');
+            console.log("user wants to take a photo");
             return this.takePhoto();
           case 2:
-            console.log('user wants to get their location');
+            console.log("user wants to get their location");
             return this.getLocation();
-          default:
         }
-      },
+      }
     );
   };
 

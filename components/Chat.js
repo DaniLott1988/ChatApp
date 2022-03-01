@@ -3,7 +3,7 @@ import 'react-native-gesture-handler';
 import { View, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
-import "firebase/firestore";
+import 'firebase/firestore';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
 import MapView from 'react-native-maps';
@@ -40,7 +40,6 @@ export default class Chat extends React.Component {
     }
 
     this.referenceChatMessages = firebase.firestore().collection("messages");
-    this.refMsgsUser = null;
 
   }
 
@@ -109,31 +108,25 @@ export default class Chat extends React.Component {
         this.setState({ isConnected: true });
 				console.log('online');
 
-				this.unsubscribe = this.referenceChatMessages
-					.orderBy('createdAt', 'desc')
-					.onSnapshot(this.onCollectionUpdate);
+        this.unsubscribe = this.referenceChatMessages
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(this.onCollectionUpdate);
 
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        return await firebase.auth().signInAnonymously();
-      }
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+          if (!user) {
+            return await firebase.auth().signInAnonymously();
+          }
 
-      this.setState({
-        uid: user.uid,
-        messages: [],
-        user: {
-          _id: user.uid,
-          name: name,
-          avatar: "https://placeimg.com/140/140/any",
-        },
+        this.setState({
+          uid: user.uid,
+          messages: [],
+          user: {
+            _id: user.uid,
+            name: name,
+            avatar: "https://placeimg.com/140/140/any",
+          },
+        });
       });
-
-      this.refMsgsUser = firebase
-        .firestore()
-        .collection('messages')
-        .where('uid', '==', this.state.uid);
-        
-    });
 
     this.saveMessages();
     } else {
