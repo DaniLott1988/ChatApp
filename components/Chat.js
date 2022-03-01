@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import 'react-native-gesture-handler';
 import { View, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
@@ -6,7 +7,7 @@ import "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
 import MapView from 'react-native-maps';
-import { CustomActions } from './CustomActions';
+import CustomActions from './CustomActions';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCz0tSItpib2o8ikutynA33nHmVA-o0Y-A",
@@ -31,8 +32,8 @@ export default class Chat extends React.Component {
       },
       isConnected: false,
       image: null,
-      location: null,
-    };
+      location: null
+    }
 
     if (!firebase.apps.length){
       firebase.initializeApp(firebaseConfig);
@@ -42,6 +43,29 @@ export default class Chat extends React.Component {
     this.refMsgsUser = null;
 
   }
+
+  onCollectionUpdate = (querySnapshot) => { 
+    const messages = [];
+    querySnapshot.forEach((doc) => {
+      // get the doc data
+      let data = doc.data();
+      messages.push({
+        _id: data._id,
+        text: data.text,
+        createdAt: data.createdAt.toDate(),
+        user: {
+          _id: data.user._id,
+          name: data.user.name,
+          avatar: data.user.avatar
+        },
+        image: data.image || null,
+        location: data.location || null,
+      });
+    });
+    this.setState({
+      messages: messages
+    });
+  };
 
   async getMessages() {
     let messages = '';
@@ -108,6 +132,7 @@ export default class Chat extends React.Component {
         .firestore()
         .collection('messages')
         .where('uid', '==', this.state.uid);
+        
     });
 
     this.saveMessages();
@@ -120,45 +145,42 @@ export default class Chat extends React.Component {
     });
   }
 
-  onCollectionUpdate = (querySnapshot) => { 
-    const messages = [];
-    // go through each document
-    querySnapshot.forEach((doc) => {
-      // get the QueryDocumentSnapshot's data
-      let data = doc.data();
-      messages.push({
-        _id: data._id,
-        text: data.text,
-        createdAt: data.createdAt.toDate(),
-        user: {
-          _id: data.user._id,
-          name: data.user.name,
-          avatar: data.user.avatar
-        },
-        image: data.image || null,
-        location: data.location || null,
-      });
-    });
-    this.setState({
-      messages: messages
-    });
-  };
-
   addMessages() { 
     const message = this.state.messages[0];
     // add a new messages to the collection
     this.referenceChatMessages.add({
       _id: message._id,
-      text: message.text || null,
+      text: message.text || '',
       createdAt: message.createdAt,
-      user: {
-        _id: message.user._id,
-        name: message.user.name,
-        avatar: message.user.avatar
-      },
-      image: message.image || "",
+      user: this.state.user,
+      image: message.image || '',
       location: message.location || null
     });
+  }
+
+  renderCustomView(props) {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{width: 150,
+            height: 100,
+            borderRadius: 13,
+            margin: 3}}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
+  renderCustomActions(props) {
+    return <CustomActions {...props} />;
   }
 
   onSend(messages = []) {
@@ -184,50 +206,23 @@ export default class Chat extends React.Component {
 
   
   renderInputToolbar(props) {
-    if (this.state.isConnected == false) {
-    } else {
-      return(
+		if (this.state.isConnected == false) {
+		} else {
+			return (
         <InputToolbar
-        {...props}
+          {...props}
         />
       );
-    }
-  }
+		}
+	}
 
-  renderCustomView (props) {
-    const { currentMessage} = props;
-    if (currentMessage.location) {
-      return (
-          <MapView
-            style={{width: 150,
-              height: 100,
-              borderRadius: 13,
-              margin: 3}}
-            region={{
-              latitude: currentMessage.location.latitude,
-              longitude: currentMessage.location.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-          />
-      );
-    }
-    return null;
-  }
-
-  renderCustomActions(props) {
-    return <CustomActions {...props} />;
-  }
-  
   componentWillUnmount() {
     NetInfo.fetch().then((connection) => {
-      
       if (connection.isConnected) {
-        this.authUnsubscribe();
         this.unsubscribe();
+        this.authUnsubscribe();
       }
     });
-
   }
 
   render() {
@@ -241,19 +236,20 @@ export default class Chat extends React.Component {
         <View style={{...styles.container,
           backgroundColor: bgColor
         }}>
-
-        <GiftedChat
-          renderBubble={this.renderBubble.bind(this)}
-          renderInputToolbar={this.renderInputToolbar.bind(this)}
-          renderActions={this.renderCustomActions}
-          renderCustomView={this.renderCustomView}
-          messages={this.state.messages}
-          onSend={messages => this.onSend(messages)}
-          user={{
-            _id: this.state.user._id,
-            name: this.state.user.name,
-            avatar: this.state.user.avatar
-          }} />
+          
+          <GiftedChat
+            renderBubble={this.renderBubble.bind(this)}
+            messages={this.state.messages}
+            renderInputToolbar={this.renderInputToolbar.bind(this)}
+            renderActions={this.renderCustomActions}
+            renderCustomView={this.renderCustomView}
+            onSend={(messages) => this.onSend(messages)}
+            user={{
+              _id: this.state.user._id,
+              name: this.state.name,
+              avatar: this.state.user.avatar,
+            }}
+          />
 
           { Platform.OS === 'android' ? <KeyboardAvoidingView behavior='height'/> : null }
 
